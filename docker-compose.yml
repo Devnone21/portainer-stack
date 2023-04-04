@@ -19,7 +19,7 @@ services:
     ports:
     - 9090:9090
     command:
-    - --config.file=./prometheus.yml
+    - --config.file=${PWD}/prometheus.yml
     depends_on:
     - cadvisor
   cadvisor:
