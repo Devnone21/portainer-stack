@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.2'
 services:
 
   nginx-proxy-manager:
@@ -34,7 +34,7 @@ services:
       - 8080:8080
     volumes:
       - /:/rootfs:ro
-      - /var/run:/var/run:ro
+      - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     depends_on:
