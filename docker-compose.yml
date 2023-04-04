@@ -12,9 +12,6 @@ services:
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
-    build:
-      context: .
-      network: bridge
     depends_on:
       - prometheus
       
@@ -31,9 +28,6 @@ services:
       - source: prometheus_conf
         target: /etc/prometheus/prometheus.yml
         mode: 0440
-    build:
-      context: .
-      network: bridge
     depends_on:
       - cadvisor
     
@@ -47,9 +41,6 @@ services:
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-    build:
-      context: .
-      network: bridge
     depends_on:
       - redis
     
@@ -58,9 +49,7 @@ services:
     container_name: redis
     ports:
       - 6379:6379
-    build:
-      context: .
-      network: bridge
+      
 
 configs:
   prometheus_conf:
