@@ -1,14 +1,25 @@
 version: '3.2'
 services:
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:2.10.1'
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    depends_on:
+      - prometheus
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
     - 9090:9090
     command:
-    - --config.file=/etc/prometheus/prometheus.yml
-    volumes:
-    - ./:/etc/prometheus/:ro
+    - --config.file=./prometheus.yml
     depends_on:
     - cadvisor
   cadvisor:
