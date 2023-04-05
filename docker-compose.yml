@@ -1,46 +1,63 @@
 version: '3.8'
-services:
 
-  nginx-proxy-manager:
-    image: 'jc21/nginx-proxy-manager:2.10.1'
-    container_name: nginx-proxy-manager
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus_data: {}
+
+services:
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
     restart: unless-stopped
     ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
-    volumes:
-      - ./data:/data
-      - ./letsencrypt:/etc/letsencrypt
+      - 3000:3000
+    networks:
+      - monitoring
     depends_on:
       - prometheus
-      
   prometheus:
+    image: prometheus:tiny
     container_name: prometheus
+    restart: unless-stopped
     build:
         context: ./prometheus
         dockerfile: Dockerfile
+    volumes:
+      - prometheus_data:/prometheus
     ports:
       - 9090:9090
+    networks:
+      - monitoring
     depends_on:
       - cadvisor
-    
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    ports:
-      - 8080:8080
+    restart: unless-stopped
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-    depends_on:
-      - redis
-    
-  redis:
-    image: redis:latest
-    container_name: redis
     ports:
-      - 6379:6379
-
+      - 8080:8080
+    networks:
+      - monitoring
+    depends_on:
+      - nginx-proxy-manager
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:2.10.1
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    volumes:
+      - ./nginx_data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    ports:
+      - 80:80
+      - 81:81
+      - 443:443
+    networks:
+      - monitoring
