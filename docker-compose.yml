@@ -51,7 +51,7 @@ services:
 
   nginx-proxy-manager:
     image: jc21/nginx-proxy-manager:2.10.1
-    container_name: nginx-proxy-manager
+    container_name: nginx-manager
     restart: unless-stopped
     volumes:
       - ./nginx_data:/data
