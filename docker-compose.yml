@@ -18,6 +18,7 @@ services:
       - monitoring
     depends_on:
       - prometheus
+      
   prometheus:
     image: prometheus:tiny
     container_name: prometheus
@@ -33,6 +34,7 @@ services:
       - monitoring
     depends_on:
       - cadvisor
+      
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
@@ -46,8 +48,7 @@ services:
       - 8080:8080
     networks:
       - monitoring
-    depends_on:
-      - nginx-proxy-manager
+
   nginx-proxy-manager:
     image: jc21/nginx-proxy-manager:2.10.1
     container_name: nginx-proxy-manager
