@@ -51,7 +51,9 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./config/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - type: bind
+        source: ./config/grafana-datasources.yml
+        target: /etc/grafana/provisioning/datasources/datasources.yaml
       - grafana_data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -68,8 +70,10 @@ services:
     ports:
       - 9080
     volumes:
+      - type: bind
+        source: ./config/promtail.yaml
+        target: /etc/promtail/promtail.yaml
       - ./loki/:/var/log/
-      - ./config:/etc/promtail/
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
     command: -config.file=/etc/promtail/promtail.yaml
@@ -80,17 +84,20 @@ services:
       
   prometheus:
     image: prom/prometheus:v2.27.0
-    container_name: prometheus-v2
+    container_name: prometheus
     restart: unless-stopped
     ports:
       - 9090
     volumes:
+      - type: bind
+        source: ./config/prometheus.yaml
+        target: /etc/prometheus/prometheus.yaml
       - ./config:/etc/prometheus/
       - prometheus_data:/prometheus
     command:
       [
         '--log.level=debug',
-        '--config.file=/etc/prometheus/prometheus.yml',
+        '--config.file=/etc/prometheus/prometheus.yaml',
         '--enable-feature=remote-write-receiver',
         '--query.lookback-delta=30s'
       ]
@@ -150,3 +157,17 @@ services:
     command: "-config.file=/etc/loki/loki.yaml -target=backend -legacy-read-mode=false"
     networks:
       - monitoring
+
+  loki-gateway:
+    image: nginx:1.19
+    container_name: loki-gateway
+    volumes:
+      - type: bind
+        source: ./config/loki-gateway.conf
+        target: /etc/nginx/nginx.conf
+    ports:
+      - "8080:8100"
+      - "3100"
+    networks:
+      - monitoring
+
