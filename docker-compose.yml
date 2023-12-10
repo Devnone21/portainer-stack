@@ -2,22 +2,66 @@ version: '3.8'
 
 networks:
   monitoring:
+    name: monitoring
     driver: bridge
 
 volumes:
   prometheus_data: {}
 
 services:
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:2.10.1
+    container_name: nginx-manager
+    restart: unless-stopped
+    volumes:
+      - ./nginx_data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+    ports:
+      - 80:80
+      - 81:81
+      - 443:443
+    networks:
+      - monitoring
+
   grafana:
     image: grafana/grafana
     container_name: grafana
     restart: unless-stopped
     ports:
       - 3000:3000
+    volumes:
+      - ./config/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
     networks:
       - monitoring
+
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: loki
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitoring
+
+  promtail:
+    image:  grafana/promtail:2.9.2
+    container_name: promtail
+    volumes:
+      - ./config/promtail.yaml:/etc/promtail/docker-config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/docker-config.yaml
     depends_on:
-      - prometheus
+      - loki
+    networks:
+      - monitoring
       
   prometheus:
     image: prometheus:tiny
@@ -49,16 +93,4 @@ services:
     networks:
       - monitoring
 
-  nginx-proxy-manager:
-    image: jc21/nginx-proxy-manager:2.10.1
-    container_name: nginx-manager
-    restart: unless-stopped
-    volumes:
-      - ./nginx_data:/data
-      - ./letsencrypt:/etc/letsencrypt
-    ports:
-      - 80:80
-      - 81:81
-      - 443:443
-    networks:
-      - monitoring
+
