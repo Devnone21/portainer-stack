@@ -120,7 +120,6 @@ services:
 
   loki-read:
     image: *lokiImage
-    container_name: loki-read
     restart: always
     volumes:
       - ./config:/etc/loki/
@@ -137,7 +136,6 @@ services:
 
   loki-write:
     image: *lokiImage
-    container_name: loki-write
     restart: always
     volumes:
       - ./config:/etc/loki/
@@ -153,7 +151,6 @@ services:
 
   loki-backend:
     image: *lokiImage
-    container_name: loki-backend
     restart: always
     volumes:
       - ./config:/etc/loki/
@@ -166,7 +163,7 @@ services:
     deploy:
       mode: replicated
       replicas: 3
-      
+
   loki-gateway:
     image: nginx:1.19
     container_name: loki-gateway
