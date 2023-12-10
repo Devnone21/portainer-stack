@@ -131,6 +131,9 @@ services:
     command: "-config.file=/etc/loki/loki.yaml -target=read"
     networks:
       - monitoring
+    deploy:
+      mode: replicated
+      replicas: 3
 
   loki-write:
     image: *lokiImage
@@ -144,6 +147,9 @@ services:
     command: "-config.file=/etc/loki/loki.yaml -target=write"
     networks:
       - monitoring
+    deploy:
+      mode: replicated
+      replicas: 3
 
   loki-backend:
     image: *lokiImage
@@ -157,7 +163,10 @@ services:
     command: "-config.file=/etc/loki/loki.yaml -target=backend -legacy-read-mode=false"
     networks:
       - monitoring
-
+    deploy:
+      mode: replicated
+      replicas: 3
+      
   loki-gateway:
     image: nginx:1.19
     container_name: loki-gateway
