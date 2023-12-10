@@ -56,7 +56,6 @@ services:
         target: /etc/grafana/provisioning/datasources/datasources.yaml
       - grafana_data:/var/lib/grafana
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_DISABLE_LOGIN_FORM=true
@@ -173,7 +172,7 @@ services:
         target: /etc/nginx/nginx.conf
     ports:
       - "8100:80"
-      - "3100"
+      - "33100:3100"
     networks:
       - monitoring
 
