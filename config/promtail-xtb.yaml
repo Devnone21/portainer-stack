@@ -1,0 +1,32 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: "info"
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki-gateway:8100/loki/api/v1/push
+    tenant_id: docker
+
+scrape_configs:
+  - job_name: xtb-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: xtb-logs
+          __path__: /var/log/xtb-app.log*
+    pipeline_stages:
+      - regex:
+           expression: '^(?P<extractedtimestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) - (?P<level>[[:alpha:]]+) - (?P<xtbapp>\S+) - (?P<message>.*)$'
+      - labels:
+          reformattedtimestamp: extractedtimestamp
+          level: level
+          xtbapp: xtbapp
+          message: message
+      - timestamp:
+          source: extractedtimestamp
+          format: "2023-12-11 00:59:04"
+          location: Asia/Bangkok
